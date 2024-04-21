@@ -57,7 +57,6 @@ void esp32_sleep() {
 
 void shut_down_now() {
   Serial.println("power off");
-  buzzer.beep(4, 50);
 #ifdef CHINESE
   refreshOLED((char*)"关机", FONT_M);
 #endif
@@ -171,6 +170,7 @@ float getVoltage(int pin) {
 }
 
 void power_off(int min) {
+  return;
   if (getVoltage(BATTERY_PIN) < BATTERY_VOLTAGE_MIN) {
     shut_down_low_battery(getVoltage(BATTERY_PIN));
     return;
@@ -193,6 +193,7 @@ void power_off(int min) {
 }
 
 void power_off_gyro(int sec) {
+  return;
   if (!b_f_is_charging) {
     if (sec == -1) {
       t_power_off_gyro = millis();
@@ -210,6 +211,7 @@ void power_off_gyro(int sec) {
 }
 
 void power_off(double sec) {
+  return;
   if (!b_f_is_charging) {
     if (sec == -1) {
       t_power_off = millis();

@@ -5,6 +5,9 @@
 //ble
 unsigned long lastWeightNotifyTime = 0;  // Stores the last time the weight notification was sent
 const long weightNotifyInterval = 100;   // Interval at which to send weight notifications (milliseconds)
+unsigned long lastWeightSerialTime = 0;  // Stores the last time the weight notification was sent
+const long weightSerialInterval = 1000;   // Interval at which to send weight notifications (milliseconds)
+
 int i_onWrite_counter = 0;
 //
 int windowLength = 5;  // default window length
