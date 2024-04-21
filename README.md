@@ -5,6 +5,19 @@ Copyright 2024 Decent Espresso International Ltd
 Credits:
 Invention and authorship: Chen Zhichao (aka "Sofronio")
 
+# Simplified bare bones version for BT only use with the Decent machine.
+
+Only requires the HX711 library below. Note for the wiring - any two pins
+available can be used on an ESP32 module - just set those up in so_config.h .
+
+The scale does not need to be put into pairing mode. This version is designed
+to be permanently powered via USB (or some other supply) and will not turn
+off. Just about any ESP32 board/module should work.
+
+To calibrate the load cell, enable the serial monitor. Baud rate should be
+11500. Send 'c' and enter to the module, and follow the instructions. Just
+use any known weight.
+
 # Introduction:
 The Decent Open Scale is a full open sourced(software/hardware/cad design) BLE scale. Currently you can use it with de1app and Decent Espresso machine. But with Decent Scale API, you can use it for anything.<br />
 To make it work, you need at least an ESP32 for MCU, a Loadcell for weighing, an HX711 for Loadcell ADC, a SSD1306 for OLED display, a MPU6050 for gyro function.<br />
