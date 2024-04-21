@@ -41,29 +41,12 @@
 #include <EEPROM.h>
 #endif
 
-//#include "so_config.h"
 #include "so_parameter.h"
-//#include "so_power.h"
-//#include "so_display.h"
-//#include "so_menu.h"
-//#include "so_boot_menu.h"
 #include "so_declare.h"
-//#include "so_wifi_ota.h"
-//#include "so_espnow.h"
 #include "so_config.h"
 
-#define BTLOG_print(a...) Serial.print(a)
-#define BTLOG_println(a...) Serial.println(a)
-
-//#include <BluetoothSerial.h>
-//BluetoothSerial SerialBT;
-
-// #ifndef BT
-// #ifdef DEBUG_BT
-// #include <BluetoothSerial.h>
-// BluetoothSerial SerialBT;
-// #endif
-// #endif
+#define BTLOG_print(a...) {}
+#define BTLOG_println(a...) {}
 
 //functions 函数
 
@@ -206,14 +189,6 @@ class MyCallbacks : public BLECharacteristicCallbacks {
   }
 };
 
-//buttons
-
-void cal() {
-}
-
-void setContainerWeight() {
-}
-
 void setup() {
   delay(50);  //有些单片机会重启两次
   //some soc may reset twice
@@ -222,7 +197,6 @@ void setup() {
   while (!Serial)
     ;
   delay(200);
-  Serial.println("Hola!");
   BLEDevice::init("Decent Scale");
 
   // Create BLE Server
@@ -260,12 +234,7 @@ void setup() {
   EEPROM.begin(512);
   //delay(2000);
   Serial.println("Begin!");
-  analogReadResolution(ADC_BIT);
-
-  //power_off(15);
-
-  i_button_cal_status = 1;  //校准状态归1
-  //calibration status goes to 1
+ 
   unsigned long stabilizingtime = 500;  //去皮时间(毫秒)，增加可以提高去皮精确度
   //taring duration. longer for better reading.
   boolean _tare = true;  //电子秤初始化去皮，如果不想去皮则设为false
@@ -276,117 +245,12 @@ void setup() {
   //检查校准值合法性
   EEPROM.get(i_addr_calibration_value, f_calibration_value);
   if (isnan(f_calibration_value)) {
-    b_f_calibration = true;  //让按钮进入校准状态3
-    //put calibration to status 3
-    //cal();  //无有效读取，进入校准模式
-    //eeprom calibration value is not valid, go to calibration procedure.
-  } else
-    scale.setCalFactor(f_calibration_value);  //设定校准值
-
-  //检查sample值合法性
-  //check sample number is valid
-  // EEPROM.get(i_addr_sample, i_sample);
-  // if (isnan(i_sample)) {
-  //   b_f_set_sample = true;
-  //   i_sample = 0;  //读取失败 默认值为3 对应sample为8
-  //   i_sample_step = 0;
-  //   setSample();
-  // }
-  //重新校准
-  //recalibration
-
-  //灵敏度设置
-  //sensitivity
-  // if (digitalRead(BUTTON_SET) == LOW) {
-  //   b_f_set_sample = true;
-  //   i_sample_step = 0;
-  //   setSample();
-  // }
-
-  //4按键模式时显示信息
-
-
- // f_calibration_value = 170200.0 / 168.04 * 814.3 / 168.04;
+    f_calibration_value = 1.0;
+    }
   scale.setCalFactor(f_calibration_value);  //设置偏移量
-  //set the calibration value
-  //scale.setSamplesInUse(sample[i_sample]);  //设置灵敏度
   scale.setSamplesInUse(16);  //设置灵敏度
   scale.tareNoDelay();
   Serial.println("Setup complete...");
-}
-
-void pureScale() {
-  static boolean newDataReady = 0;
-  static boolean scaleStable = 0;
-  float f_weight_adc_raw = 0;
-  if (scale.update()) newDataReady = true;
-  if (newDataReady) {
-    f_weight_adc = scale.getData();
-
-    circularBuffer[bufferIndex] = f_weight_adc;
-    bufferIndex = (bufferIndex + 1) % windowLength;
-    // calculate moving average
-    f_weight_smooth = 0;
-    for (int i = 0; i < windowLength; i++) {
-      f_weight_smooth += circularBuffer[i];
-    }
-    f_weight_smooth /= windowLength;
-    if (!b_f_minus_container_button) {
-      //自动减去容器重量
-      if (f_weight_container >= 1 && f_weight_smooth >= f_weight_container - NegativeTolerance && f_weight_smooth <= f_weight_container + PositiveTolerance) {
-        // calculate difference between scale value and container value
-        f_weight_smooth = f_weight_smooth - f_weight_container;
-        b_f_minus_container = true;
-      } else
-        b_f_minus_container = false;
-    } else if (f_weight_container >= 1) {
-      //手动减去容器重量
-      f_weight_smooth = f_weight_smooth - f_weight_container;
-      b_f_minus_container = true;
-    }
-    // print smoothed reading
-    newDataReady = false;
-    if (f_weight_smooth >= f_displayedValue - OledTolerance && f_weight_smooth <= f_displayedValue + OledTolerance) {
-      // scale value is within tolerance range, do nothing
-      // or weight is around 0, then set to 0.
-      if (f_weight_smooth > -0.1 && f_weight_smooth < 0.1)
-        f_displayedValue = 0.0;
-    } else {
-      // scale value is outside tolerance range, update displayed value
-      f_displayedValue = f_weight_smooth;
-      // print result to serial monitor
-    }
-
-    f_weight_before_input = f_displayedValue;
-
-    //串口输出原始重量读数
-
-    dtostrf(f_weight_adc, 7, i_decimal_precision, c_weight);
-  }
-  if (scale.getTareStatus()) {
-    b_f_weight_quick_zero = false;
-  }
-  //记录咖啡粉时，将重量固定为0
-  if (b_f_weight_quick_zero)
-    f_displayedValue = 0.0;
-
-  float ratio_temp = f_displayedValue / f_weight_dose;
-  if (ratio_temp < 0)
-    ratio_temp = 0.0;
-  if (f_weight_dose < 0.1)
-    ratio_temp = 0.0;
-  dtostrf(ratio_temp, 7, i_decimal_precision, c_brew_ratio);
-  // if (millis() - t_temp > 500) {
-  //   // Serial.print("temperature:");
-  //   Serial.print(f_filtered_temperature);
-  //   Serial.print("\t");
-  //   // Serial.print("weightCompensation:");
-  //   Serial.print(f_weight_smooth);
-  //   Serial.print("\t");
-  //   // Serial.print("f_weight_smooth:");
-  //   Serial.println(f_displayedValue);
-  //   t_temp = millis();
-  // }
 }
 
 void serialCommand() {
@@ -471,9 +335,7 @@ void serialCommand() {
 }
 
 void loop() {
-  //Serial.println(getDoubleClickDelay());
-  //power_off(15);  //power off after 15 minutes
-
+  scale.update();
   serialCommand();
   if (deviceConnected) {
     unsigned long currentMillis = millis();
@@ -501,12 +363,10 @@ void loop() {
       pReadCharacteristic->notify();
     }
   }
-
-  pureScale();
   unsigned long currentMillis = millis();
   if (currentMillis - lastWeightSerialTime >= weightSerialInterval) {
     // Save the last time you sent the weight notification
     lastWeightSerialTime = currentMillis;
-    Serial.println(c_weight);
+    Serial.println(scale.getData());
   }
 }

@@ -4,8 +4,6 @@
 
 #include <HX711_ADC.h>
 HX711_ADC scale(HX711_SDA, HX711_SCL);  //HX711模数转换初始化
-CoffeeData coffeeData;
-
 
 #include <BLEDevice.h>
 #include <BLEUtils.h>

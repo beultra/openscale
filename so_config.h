@@ -13,18 +13,8 @@
 #define CUUID_DECENTSCALE_WRITEBACK "83CDC3D4-3BA2-13FC-CC5E-106C351A9352"
 #define SUUID_DECENTSCALE "0000FFF0-0000-1000-8000-00805F9B34FB"
 
-#define PositiveTolerance 25  // positive tolerance range in grams
-#define NegativeTolerance 5   // negative tolerance range in grams
-#define OledTolerance 0.09
-
-
-
 #define BT
-//#define DEBUG
-//#define DEBUG_BT
-//#define DEBUG_BATTERY
 
-#define ADC_BIT 12
 #define HX711_SCL 33
 #define HX711_SDA 32
 
