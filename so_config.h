@@ -15,7 +15,7 @@
 
 #define BT
 
-#define HX711_SCL 33
-#define HX711_SDA 32
+#define HX711_SCL 23
+#define HX711_SDA 22
 
 #endif
